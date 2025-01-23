@@ -8,18 +8,25 @@ app_license = "mit"
 # Apps
 # ------------------
 
-# required_apps = []
+required_apps = ['erpnext']
 
 # Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "popsicle_sale",
-# 		"logo": "/assets/popsicle_sale/logo.png",
-# 		"title": "Popsicle Sale",
-# 		"route": "/popsicle_sale",
-# 		"has_permission": "popsicle_sale.api.permission.has_app_permission"
-# 	}
-# ]
+add_to_apps_screen = [
+	{
+		"name": "popsicle_sale",
+		"logo": "/assets/popsicle_sale/logo.png",
+		"title": "Popsicle Sale",
+		"route": "/app/popsicle-sales",
+		"has_permission": "popsicle_sale.check_app_permission"
+	}
+]
+
+# Fixtures
+# ------------------
+fixtures = [
+    # export all records from the Category table
+    "Custom Field"
+]
 
 # Includes in <head>
 # ------------------
