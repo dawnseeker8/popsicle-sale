@@ -136,21 +136,16 @@ fixtures = [
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+    "POS Invoice Merge Log": "popsicle_sale.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.CustomPOSInvoiceMergeLog"
+}
 
 # Document Events
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+}
 
 # Scheduled Tasks
 # ---------------
@@ -248,4 +243,3 @@ fixtures = [
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-
