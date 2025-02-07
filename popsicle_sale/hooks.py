@@ -55,6 +55,13 @@ fixtures = [
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
+# DocType JS
+# ---------------
+doctype_js = {
+    "Stock Entry": "public/js/stock_entry.js",
+	"Warehouse": "public/js/warehouse.js"
+}
+
 # Svg Icons
 # ------------------
 # include app icons in desk
