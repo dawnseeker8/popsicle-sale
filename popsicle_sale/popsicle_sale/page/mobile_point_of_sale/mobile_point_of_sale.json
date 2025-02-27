@@ -1,0 +1,31 @@
+{
+ "content": null,
+ "creation": "2025-02-20 15:21:27.957182",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "fa-regular fa-hard-drive",
+ "idx": 0,
+ "modified": "2025-02-21 17:00:20.004797",
+ "modified_by": "Administrator",
+ "module": "Popsicle Sale",
+ "name": "mobile-point-of-sale",
+ "owner": "Administrator",
+ "page_name": "mobile-point-of-sale",
+ "restrict_to_domain": "",
+ "roles": [
+  {
+   "role": "Popsicle Sales User"
+  },
+  {
+   "role": "Popsicle Sales Manager"
+  },
+  {
+   "role": "Popsicle Sales Master Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Mobile Point Of Sales"
+}

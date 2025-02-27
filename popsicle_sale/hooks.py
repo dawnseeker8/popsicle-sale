@@ -12,13 +12,13 @@ required_apps = ['erpnext']
 
 # Each item in the list will be shown as an app in the apps page
 add_to_apps_screen = [
-	{
-		"name": "popsicle_sale",
-		"logo": "/assets/popsicle_sale/logo.png",
-		"title": "Popsicle Sale",
-		"route": "/app/popsicle-sales",
-		"has_permission": "popsicle_sale.check_app_permission"
-	}
+    {
+        "name": "popsicle_sale",
+        "logo": "/assets/popsicle_sale/logo.png",
+                "title": "Popsicle Sale",
+                "route": "/app/popsicle-sales",
+                "has_permission": "popsicle_sale.check_app_permission"
+    }
 ]
 
 # Fixtures
@@ -32,7 +32,7 @@ fixtures = [
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/popsicle_sale/css/popsicle_sale.css"
+# app_include_css = "/assets/popsicle_sale/css/popsicle-sale.bundle.css"
 # app_include_js = "/assets/popsicle_sale/js/popsicle_sale.js"
 
 # include js, css files in header of web template
@@ -40,7 +40,9 @@ fixtures = [
 # web_include_js = "/assets/popsicle_sale/js/popsicle_sale.js"
 
 # include custom scss in every website theme (without file extension ".scss")
-# website_theme_scss = "popsicle_sale/public/scss/website"
+website_theme_scss = "popsicle_sale/public/scss/popsicle-sale.bundle"
+
+# app_include_scss = "popsicle_sale/public/scss/popsicle-sale.bundle"
 
 # include js, css files in header of web form
 # webform_include_js = {"doctype": "public/js/doctype.js"}
@@ -48,6 +50,9 @@ fixtures = [
 
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
+# page_scss = {
+# 	"mobile-point-of-sale": "public/scss/mobile-point-of-sale.scss",
+# }
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
@@ -59,7 +64,7 @@ fixtures = [
 # ---------------
 doctype_js = {
     "Stock Entry": "public/js/stock_entry.js",
-	"Warehouse": "public/js/warehouse.js"
+    "Warehouse": "public/js/warehouse.js"
 }
 
 # Svg Icons
@@ -143,9 +148,9 @@ doctype_js = {
 # ---------------
 # Override standard doctype classes
 
-override_doctype_class = {
-    "POS Invoice Merge Log": "popsicle_sale.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.CustomPOSInvoiceMergeLog"
-}
+# override_doctype_class = {
+#     "POS Invoice Merge Log": "popsicle_sale.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.CustomPOSInvoiceMergeLog"
+# }
 
 # Document Events
 # ---------------

@@ -1,0 +1,54 @@
+/* ../../../../../tmp/tmp-28174-aK8HbbpkcWNh/popsicle_sale/popsicle_sale/public/scss/mobile-point-of-sale.bundle.css */
+.point-of-sale-app.mobile-point-of-sale-app section {
+  min-height: auto;
+  height: calc(100vh - 200px);
+  max-height: calc(100vh - 200px);
+}
+.point-of-sale-app.mobile-point-of-sale-app .pointer-no-select {
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+.point-of-sale-app.mobile-point-of-sale-app .pos-card {
+  background-color: var(--fg-color);
+  box-shadow: var(--shadow-base);
+  border-radius: var(--border-radius-md);
+}
+.point-of-sale-app.mobile-point-of-sale-app .mode-of-payment {
+  min-height: 8em;
+}
+.point-of-sale-app.mobile-point-of-sale-app .pagination-section {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 15px;
+  margin-bottom: 10px;
+  background-color: var(--fg-color);
+  border-radius: var(--border-radius-sm);
+}
+.point-of-sale-app.mobile-point-of-sale-app .pagination-section .btn {
+  min-width: 100px;
+}
+.point-of-sale-app.mobile-point-of-sale-app .pagination-section .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pagination-button-toolbar {
+  background-color: var(--fg-color);
+  padding: 8px 0;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 10px;
+}
+.pagination-button-toolbar .container {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 15px;
+}
+.pagination-button-toolbar .container .btn {
+  min-width: 100px;
+}
+.pagination-button-toolbar .container .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/*# sourceMappingURL=mobile-point-of-sale.bundle.LPXGRTTB.css.map */
