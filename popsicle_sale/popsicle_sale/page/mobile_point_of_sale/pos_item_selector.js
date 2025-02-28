@@ -8,10 +8,6 @@ popsicle_sale.MobilePointOfSale.ItemSelector = class {
 		this.pos_profile = pos_profile;
 		this.hide_images = settings.hide_images;
 		this.auto_add_item = settings.auto_add_item_to_cart;
-		
-		// Initialize pagination variables
-		this.current_page = 0;
-		this.page_length = 40;
 
 		this.inti_component();
 	}
@@ -52,19 +48,16 @@ popsicle_sale.MobilePointOfSale.ItemSelector = class {
 
 		this.get_items({}).then(({ message }) => {
 			this.render_item_list(message.items);
-			// Store total items count for pagination
-			this.total_items = message.items.length;
-			this.update_pagination_status();
 		});
 	}
 
-	get_items({ start = this.current_page * this.page_length, page_length = this.page_length, search_term = "" }) {
+	get_items({ start = 0, page_length = 40, search_term = "" }) {
 		const doc = this.events.get_frm().doc;
 		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
 
 		!item_group && (item_group = this.parent_item_group);
-		
+
 		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
@@ -79,9 +72,6 @@ popsicle_sale.MobilePointOfSale.ItemSelector = class {
 			const item_html = this.get_item_html(item);
 			this.$items_container.append(item_html);
 		});
-		
-		// Update pagination status after rendering items
-		this.update_pagination_status();
 	}
 
 	get_item_html(item) {
@@ -128,6 +118,7 @@ popsicle_sale.MobilePointOfSale.ItemSelector = class {
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(uom)}"
 				data-rate="${escape(price_list_rate || 0)}"
+				data-stock-uom="${escape(item.stock_uom)}"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
@@ -261,17 +252,19 @@ popsicle_sale.MobilePointOfSale.ItemSelector = class {
 			let serial_no = unescape($item.attr("data-serial-no"));
 			let uom = unescape($item.attr("data-uom"));
 			let rate = unescape($item.attr("data-rate"));
+			let stock_uom = unescape($item.attr("data-stock-uom"));
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
 			rate = rate === "undefined" ? undefined : rate;
+			stock_uom = stock_uom === "undefined" ? undefined : stock_uom;
 
 			me.events.item_selected({
 				field: "qty",
 				value: "+1",
-				item: { item_code, batch_no, serial_no, uom, rate },
+				item: { item_code, batch_no, serial_no, uom, rate, stock_uom },
 			});
 			me.search_field.set_focus();
 		});
@@ -335,29 +328,28 @@ popsicle_sale.MobilePointOfSale.ItemSelector = class {
 	}
 
 	filter_items({ search_term = "" } = {}) {
+		const selling_price_list = this.events.get_frm().doc.selling_price_list;
+
 		if (search_term) {
 			search_term = search_term.toLowerCase();
 
 			// memoize
 			this.search_index = this.search_index || {};
-			if (this.search_index[search_term]) {
-				const items = this.search_index[search_term];
+			this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
+			if (this.search_index[selling_price_list][search_term]) {
+				const items = this.search_index[selling_price_list][search_term];
 				this.items = items;
 				this.render_item_list(items);
 				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
 				return;
 			}
 		}
-		
-		// Reset pagination when filtering
-		this.current_page = 0;
-		this.total_items = 0;
 
 		this.get_items({ search_term }).then(({ message }) => {
 			// eslint-disable-next-line no-unused-vars
 			const { items, serial_no, batch_no, barcode } = message;
 			if (search_term && !barcode) {
-				this.search_index[search_term] = items;
+				this.search_index[selling_price_list][search_term] = items;
 			}
 			this.items = items;
 			this.render_item_list(items);

@@ -7,3 +7,4 @@ import "../../popsicle_sale/page/mobile_point_of_sale/pos_past_order_list.js";
 import "../../popsicle_sale/page/mobile_point_of_sale/pos_past_order_summary.js";
 import "../../popsicle_sale/page/mobile_point_of_sale/pos_pagination_toolbar.js";
 import "../../popsicle_sale/page/mobile_point_of_sale/pos_controller.js";
+

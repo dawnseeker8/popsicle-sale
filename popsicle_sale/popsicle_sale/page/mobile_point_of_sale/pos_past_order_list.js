@@ -96,8 +96,8 @@ popsicle_sale.MobilePointOfSale.PastOrderList = class {
 	}
 
 	get_invoice_html(invoice) {
-		const posting_datetime = moment(invoice.posting_date + " " + invoice.posting_time).format(
-			"Do MMMM, h:mma"
+		const posting_datetime = frappe.datetime.str_to_user(
+			invoice.posting_date + " " + invoice.posting_time
 		);
 		return `<div class="invoice-wrapper" data-invoice-name="${escape(invoice.name)}">
 				<div class="invoice-name-date">
@@ -110,7 +110,7 @@ popsicle_sale.MobilePointOfSale.PastOrderList = class {
 					</div>
 				</div>
 				<div class="invoice-total-status">
-					<div class="invoice-total">${format_currency(invoice.grand_total, invoice.currency, 0) || 0}</div>
+					<div class="invoice-total">${format_currency(invoice.grand_total, invoice.currency) || 0}</div>
 					<div class="invoice-date">${posting_datetime}</div>
 				</div>
 			</div>
@@ -119,7 +119,7 @@ popsicle_sale.MobilePointOfSale.PastOrderList = class {
 
 	toggle_component(show) {
 		show
-			? this.$component.css("display", "flex") && this.refresh_list()
-			: this.$component.css("display", "none");
+      ? this.$component.css("display", "flex") && this.refresh_list()
+      : this.$component.css("display", "none");
 	}
 };

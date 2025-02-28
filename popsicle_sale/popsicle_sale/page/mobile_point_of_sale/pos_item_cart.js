@@ -29,7 +29,7 @@ popsicle_sale.MobilePointOfSale.ItemCart = class {
 	}
 
 	init_customer_selector() {
-		this.$component.append(`<div class="customer-section" style="display: none;"></div>`);
+		this.$component.append(`<div class="customer-section d-none"></div>`);
 		this.$customer_section = this.$component.find(".customer-section");
 		this.make_customer_selector();
 	}
@@ -387,9 +387,17 @@ popsicle_sale.MobilePointOfSale.ItemCart = class {
 				label: __("Discount"),
 				fieldtype: "Data",
 				placeholder: discount ? discount + "%" : __("Enter discount percentage."),
-				input_class: "input-xs hidden",
+				input_class: "input-xs",
 				onchange: function () {
 					this.value = flt(this.value);
+					if (this.value > 100) {
+						frappe.msgprint({
+							title: __("Invalid Discount"),
+							indicator: "red",
+							message: __("Discount cannot be greater than 100%."),
+						});
+						this.value = 0;
+					}
 					frappe.model.set_value(
 						frm.doc.doctype,
 						frm.doc.name,
@@ -740,6 +748,7 @@ popsicle_sale.MobilePointOfSale.ItemCart = class {
 				frappe.utils.play_sound("error");
 				return;
 			}
+			this.highlight_numpad_btn($btn, current_action);
 
 			if (first_click_event || field_to_edit_changed) {
 				this.prev_action = current_action;
@@ -785,7 +794,6 @@ popsicle_sale.MobilePointOfSale.ItemCart = class {
 			this.numpad_value = current_action;
 		}
 
-		this.highlight_numpad_btn($btn, current_action);
 		this.events.numpad_event(this.numpad_value, this.prev_action);
 	}
 
@@ -920,9 +928,12 @@ popsicle_sale.MobilePointOfSale.ItemCart = class {
 		const me = this;
 		dfs.forEach((df) => {
 			this[`customer_${df.fieldname}_field`] = frappe.ui.form.make_control({
-				df: { ...df, onchange: handle_customer_field_change },
+				df: df,
 				parent: $customer_form.find(`.${df.fieldname}-field`),
 				render_input: true,
+			});
+			this[`customer_${df.fieldname}_field`].$input?.on("blur", () => {
+				handle_customer_field_change.apply(this[`customer_${df.fieldname}_field`]);
 			});
 			this[`customer_${df.fieldname}_field`].set_value(this.customer_info[df.fieldname]);
 		});
@@ -977,8 +988,8 @@ popsicle_sale.MobilePointOfSale.ItemCart = class {
 					.html(`${__("Last transacted")} ${__(elapsed_time)}`);
 
 				res.forEach((invoice) => {
-					const posting_datetime = moment(invoice.posting_date + " " + invoice.posting_time).format(
-						"Do MMMM, h:mma"
+					const posting_datetime = frappe.datetime.str_to_user(
+						invoice.posting_date + " " + invoice.posting_time
 					);
 					let indicator_color = {
 						Paid: "green",

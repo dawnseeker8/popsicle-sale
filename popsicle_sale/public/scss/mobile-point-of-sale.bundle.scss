@@ -1,62 +1,69 @@
 .point-of-sale-app.mobile-point-of-sale-app {
-	section {
-		min-height: auto;
-		height: calc(100vh - 200px);
-		max-height: calc(100vh - 200px);
-	}
 
-	.pointer-no-select {
-		cursor: pointer;
-		user-select: none;
-	}
+  .pointer-no-select {
+    cursor: pointer;
+    user-select: none;
+  }
 
-	.pos-card {
-		background-color: var(--fg-color);
-		box-shadow: var(--shadow-base);
-		border-radius: var(--border-radius-md);
-	}
+  .pos-card {
+    background-color: var(--fg-color);
+    box-shadow: var(--shadow-base);
+    border-radius: var(--border-radius-md);
+  }
 
-	.mode-of-payment {
-		min-height: 8em;
-	}
-	
-	.pagination-section {
-		display: flex;
-		justify-content: space-between;
-		padding: 8px 15px;
-		margin-bottom: 10px;
-		background-color: var(--fg-color);
-		border-radius: var(--border-radius-sm);
-		
-		.btn {
-			min-width: 100px;
-			
-			&:disabled {
-				opacity: 0.5;
-				cursor: not-allowed;
-			}
-		}
-	}
+  .mode-of-payment {
+    min-height: 8em;
+  }
+
+  .payment-modes {
+    display: block;
+    
+    @media (min-width: 768px) {
+      display: flex;
+    }
+  }
+
+  .cart-container {
+    margin-top: 0px;
+  }
+
+  .pagination-section {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 15px;
+    margin-bottom: 10px;
+    background-color: var(--fg-color);
+    border-radius: var(--border-radius-sm);
+
+    .btn {
+      min-width: 100px;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
 }
 
 .pagination-button-toolbar {
-	background-color: var(--fg-color);
-	padding: 8px 0;
-	box-shadow: var(--shadow-sm);
-	margin-bottom: 10px;
-	
-	.container {
-		display: flex;
-		justify-content: space-between;
-		padding: 0 15px;
-		
-		.btn {
-			min-width: 100px;
-			
-			&:disabled {
-				opacity: 0.5;
-				cursor: not-allowed;
-			}
-		}
-	}
+  background-color: var(--fg-color);
+  padding: 8px 0;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 10px;
+
+  .container {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 15px;
+
+    .btn {
+      min-width: 100px;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
 }

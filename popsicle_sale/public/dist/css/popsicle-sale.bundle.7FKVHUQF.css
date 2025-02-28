@@ -1,9 +1,4 @@
-/* ../../../../../tmp/tmp-28174-hXJcGP3dFj3a/popsicle_sale/popsicle_sale/public/scss/mobile-point-of-sale.bundle.css */
-.point-of-sale-app.mobile-point-of-sale-app section {
-  min-height: auto;
-  height: calc(100vh - 200px);
-  max-height: calc(100vh - 200px);
-}
+/* ../../../../../tmp/tmp-2164-HYkxCPlIfB4a/popsicle_sale/popsicle_sale/public/scss/popsicle-sale.bundle.css */
 .point-of-sale-app.mobile-point-of-sale-app .pointer-no-select {
   cursor: pointer;
   -webkit-user-select: none;
@@ -17,6 +12,17 @@
 }
 .point-of-sale-app.mobile-point-of-sale-app .mode-of-payment {
   min-height: 8em;
+}
+.point-of-sale-app.mobile-point-of-sale-app .payment-modes {
+  display: block;
+}
+@media (min-width: 768px) {
+  .point-of-sale-app.mobile-point-of-sale-app .payment-modes {
+    display: flex;
+  }
+}
+.point-of-sale-app.mobile-point-of-sale-app .cart-container {
+  margin-top: 0px;
 }
 .point-of-sale-app.mobile-point-of-sale-app .pagination-section {
   display: flex;
@@ -51,4 +57,7 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
-/*# sourceMappingURL=mobile-point-of-sale.bundle.A2VX7S5P.css.map */
+.navbar-home img.app-logo {
+  max-height: 50px;
+}
+/*# sourceMappingURL=popsicle-sale.bundle.7FKVHUQF.css.map */

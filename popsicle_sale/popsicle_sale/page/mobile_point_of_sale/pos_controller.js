@@ -1,4 +1,16 @@
+const PAGE_ENUM = {
+	item_selector: 0,
+	cart: 1,
+	payment: 2,
+  recent_order_list: 3,
+	order_summary: 4,
+  item_details: 5,
+}
 popsicle_sale.MobilePointOfSale.Controller = class {
+
+  from_page;
+  to_page;
+
 	constructor(wrapper) {
 		this.wrapper = $(wrapper).find(".layout-main-section");
 		this.page = wrapper.page;
@@ -7,7 +19,7 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 	}
 
 	is_mobile() {
-		return frappe.utils.is_mobile();
+		return frappe.is_mobile();
 	}
 
 	fetch_opening_entry() {
@@ -159,17 +171,17 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 		this.page.set_title_sub(
 			`<span class="indicator orange">
 				<a class="text-muted" href="#Form/POS%20Opening%20Entry/${this.pos_opening}">
-					Opened at ${moment(this.pos_opening_time).format("Do MMMM, h:mma")}
+					Opened at ${frappe.datetime.str_to_user(this.pos_opening_time)}
 				</a>
 			</span>`
 		);
 	}
 
 	make_app() {
-
 		this.prepare_dom();
 		this.prepare_components();
 		this.prepare_menu();
+    this.prepare_fullscreen_btn();
 		this.make_new_invoice();
 	}
 
@@ -187,46 +199,8 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 		this.init_payments();
 		this.init_recent_order_list();
 		this.init_order_summary();
-	}
 
-	init_pagination_toolbar() {
-		this.pagination_toolbar = new popsicle_sale.MobilePointOfSale.PaginationToolbar({
-			wrapper: this.$components_wrapper,
-			page: this.page,
-			events: {
-				on_next_page: () => this.go_to_next_page(),
-				on_prev_page: () => this.go_to_prev_page()
-			}
-		});
-	}
-
-	go_to_next_page() {
-		const current_page = this.pagination_toolbar.get_current_page();
-		this.pagination_toolbar.set_current_page(current_page + 1);
-
-		// Update item selector's current page
-		this.item_selector.current_page = current_page + 1;
-
-		this.item_selector.get_items({}).then(({ message }) => {
-			this.item_selector.render_item_list(message.items);
-			this.pagination_toolbar.update_pagination_status(message.items, this.item_selector.page_length);
-		});
-	}
-
-	go_to_prev_page() {
-		const current_page = this.pagination_toolbar.get_current_page();
-
-		if (current_page > 0) {
-			this.pagination_toolbar.set_current_page(current_page - 1);
-
-			// Update item selector's current page
-			this.item_selector.current_page = current_page - 1;
-
-			this.item_selector.get_items({}).then(({ message }) => {
-				this.item_selector.render_item_list(message.items);
-				this.pagination_toolbar.update_pagination_status(message.items, this.item_selector.page_length);
-			});
-		}
+		this.update_pagination_status(PAGE_ENUM.item_selector, PAGE_ENUM.item_selector);
 	}
 
 	prepare_menu() {
@@ -246,6 +220,39 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 		this.page.add_menu_item(__("Close the POS"), this.close_pos.bind(this), false, "Shift+Ctrl+C");
 	}
 
+	prepare_fullscreen_btn() {
+		this.page.page_actions.find(".custom-actions").empty();
+
+		this.page.add_button(__("Full Screen"), null, { btn_class: "btn-default fullscreen-btn" });
+
+		this.bind_fullscreen_events();
+	}
+
+	bind_fullscreen_events() {
+		this.$fullscreen_btn = this.page.page_actions.find(".fullscreen-btn");
+
+		this.$fullscreen_btn.on("click", function () {
+			if (!document.fullscreenElement) {
+				document.documentElement.requestFullscreen();
+			} else if (document.exitFullscreen) {
+				document.exitFullscreen();
+			}
+		});
+
+		$(document).on("fullscreenchange", this.handle_fullscreen_change_event.bind(this));
+	}
+
+	handle_fullscreen_change_event() {
+		let enable_fullscreen_label = __("Full Screen");
+		let exit_fullscreen_label = __("Exit Full Screen");
+
+		if (document.fullscreenElement) {
+			this.$fullscreen_btn[0].innerText = exit_fullscreen_label;
+		} else {
+			this.$fullscreen_btn[0].innerText = enable_fullscreen_label;
+		}
+	}
+
 	open_form_view() {
 		frappe.model.sync(this.frm.doc);
 		frappe.set_route("Form", this.frm.doc.doctype, this.frm.doc.name);
@@ -254,6 +261,9 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 	toggle_recent_order() {
 		const show = this.recent_order_list.$component.is(":hidden");
 		this.toggle_recent_order_list(show);
+
+		show ? this.update_pagination_status(PAGE_ENUM.order_summary, PAGE_ENUM.recent_order_list)
+         : this.update_pagination_status(PAGE_ENUM.cart, PAGE_ENUM.item_selector);
 	}
 
 	save_draft_invoice() {
@@ -305,7 +315,10 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 			pos_profile: this.pos_profile,
 			settings: this.settings,
 			events: {
-				item_selected: (args) => this.on_cart_update(args),
+				item_selected: (args) => {
+          this.update_pagination_status(PAGE_ENUM.item_selector, PAGE_ENUM.cart);
+          this.on_cart_update(args)
+        },
 
 				get_frm: () => this.frm || {},
 			},
@@ -322,15 +335,21 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 				cart_item_clicked: (item) => {
 					const item_row = this.get_item_from_frm(item);
 					this.item_details.toggle_item_details_section(item_row);
+
+          this.update_pagination_status(PAGE_ENUM.cart, PAGE_ENUM.item_details);
 				},
 
 				numpad_event: (value, action) => this.update_item_field(value, action),
 
 				checkout: () => this.save_and_checkout(),
 
-				edit_cart: () => this.payment.edit_cart(),
+				edit_cart: () => {
+              this.payment.edit_cart();
+              this.update_pagination_status(PAGE_ENUM.cart, PAGE_ENUM.item_selector);
+        },
 
 				customer_details_updated: (details) => {
+          this.item_selector.load_items_data();
 					this.customer_details = details;
 					// will add/remove LP payment method
 					this.payment.render_loyalty_points_payment_mode();
@@ -403,6 +422,7 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 					this.item_details.toggle_item_details_section(null);
 					this.cart.prev_action = null;
 					this.cart.toggle_item_highlight();
+          this.update_pagination_status(PAGE_ENUM.item_details, PAGE_ENUM.cart);
 				},
 				get_available_stock: (item_code, warehouse) => this.get_available_stock(item_code, warehouse),
 			},
@@ -437,6 +457,7 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 							indicator: "green",
 							message: __("POS invoice {0} created succesfully", [r.doc.name]),
 						});
+            this.update_pagination_status(PAGE_ENUM.payment, PAGE_ENUM.order_summary);
 					});
 				},
 			},
@@ -451,6 +472,7 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 					frappe.db.get_doc("POS Invoice", name).then((doc) => {
 						this.order_summary.load_summary_of(doc);
 					});
+          this.update_pagination_status(PAGE_ENUM.recent_order_list, PAGE_ENUM.order_summary);
 				},
 				reset_summary: () => this.order_summary.toggle_summary_placeholder(true),
 			},
@@ -481,6 +503,7 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 						() => this.cart.load_invoice(),
 						() => this.item_selector.toggle_component(true),
 					]);
+          this.update_pagination_status(PAGE_ENUM.item_selector, PAGE_ENUM.cart);
 				},
 				delete_order: (name) => {
 					frappe.model.delete_doc(this.frm.doc.doctype, name, () => {
@@ -494,8 +517,10 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 						() => this.item_selector.toggle_component(true),
 						() => frappe.dom.unfreeze(),
 					]);
+          this.update_pagination_status(PAGE_ENUM.item_selector, PAGE_ENUM.item_selector);
 				},
 			},
+			pos_profile: this.pos_profile,
 		});
 	}
 
@@ -527,7 +552,6 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 	make_sales_invoice_frm() {
 		const doctype = "POS Invoice";
 		return new Promise((resolve) => {
-			console.warn("frm is", this.frm);
 			if (this.frm) {
 				this.frm = this.get_new_frm(this.frm);
 				this.frm.doc.items = [];
@@ -621,11 +645,19 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 			} else {
 				if (!this.frm.doc.customer) return this.raise_customer_selection_alert();
 
-				const { item_code, batch_no, serial_no, rate, uom } = item;
+				const { item_code, batch_no, serial_no, rate, uom, stock_uom } = item;
 
 				if (!item_code) return;
 
-				const new_item = { item_code, batch_no, rate, uom, [field]: value };
+				if (rate == undefined || rate == 0) {
+					frappe.show_alert({
+						message: __("Price is not set for the item."),
+						indicator: "orange",
+					});
+					frappe.utils.play_sound("error");
+					return;
+				}
+				const new_item = { item_code, batch_no, rate, uom, [field]: value, stock_uom };
 
 				if (serial_no) {
 					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
@@ -685,7 +717,7 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 					i.item_code === item_code &&
 					(!has_batch_no || (has_batch_no && i.batch_no === batch_no)) &&
 					i.uom === uom &&
-					i.rate === flt(rate)
+					i.price_list_rate === flt(rate)
 			);
 		}
 
@@ -828,13 +860,148 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 			await this.frm.save(null, null, null, () => (save_error = true));
 			// only move to payment section if save is successful
 			!save_error && this.payment.checkout();
+
+      if (!save_error) {
+        this.update_pagination_status(PAGE_ENUM.cart, PAGE_ENUM.payment);
+      }
+
 			// show checkout button on error
+			console.log("save_error", save_error);
 			save_error &&
 				setTimeout(() => {
 					this.cart.toggle_checkout_btn(true);
 				}, 300); // wait for save to finish
 		} else {
 			this.payment.checkout();
+      this.update_pagination_status(PAGE_ENUM.cart, PAGE_ENUM.payment);
 		}
 	}
+
+  update_pagination_status(from_page, to_page) {
+    console.warn(`update_pagination_status: ${from_page} to ${to_page}`);
+
+    if(!this.is_mobile()) {
+      return;
+    } else {
+      // Remove d-none class in pagination_toolbar component
+      this.pagination_toolbar.$component.removeClass("d-none");
+    }
+
+    let previous_btn_disable = false;
+    let next_btn_disable = false;
+
+    if(from_page === PAGE_ENUM.item_selector && to_page === PAGE_ENUM.item_selector) {
+
+      this.item_selector.$component.removeClass("d-none");
+      this.cart.$component.addClass("d-none");
+      this.payment.$component.addClass("d-none");
+
+      previous_btn_disable = true;
+      next_btn_disable = true;
+
+    } else if(from_page === PAGE_ENUM.item_selector && to_page === PAGE_ENUM.cart) {
+
+      this.item_selector.$component.addClass("d-none");
+      this.cart.$component.removeClass("d-none");
+      this.payment.$component.addClass("d-none");
+
+      previous_btn_disable = false;
+      next_btn_disable = true;
+
+    } else if(from_page === PAGE_ENUM.cart && to_page === PAGE_ENUM.item_selector) {
+
+      this.recent_order_list.toggle_component(false);
+      this.item_selector.$component.removeClass("d-none");
+      this.cart.$component.addClass("d-none");
+
+
+      previous_btn_disable = true;
+      next_btn_disable = false;
+
+    } else if(from_page === PAGE_ENUM.cart && to_page === PAGE_ENUM.item_details){
+
+      this.cart.$component.addClass("d-none");
+      this.item_details.$component.removeClass("d-none");
+
+      previous_btn_disable = true;
+      next_btn_disable = true;
+    } else if(from_page === PAGE_ENUM.item_details && to_page === PAGE_ENUM.cart) {
+
+      this.cart.$component.removeClass("d-none");
+
+      previous_btn_disable = false;
+      next_btn_disable = true;
+    } else if(from_page === PAGE_ENUM.cart && to_page === PAGE_ENUM.payment) {
+
+      this.cart.$component.addClass("d-none");
+      this.payment.$component.removeClass("d-none");
+
+      previous_btn_disable = false;
+      next_btn_disable = true;
+
+    } else if(from_page === PAGE_ENUM.payment && to_page === PAGE_ENUM.cart) {
+      this.payment.$component.addClass("d-none");
+      this.cart.$component.removeClass("d-none");
+
+      previous_btn_disable = true;
+      next_btn_disable = false;
+    } else if(from_page === PAGE_ENUM.payment && to_page === PAGE_ENUM.order_summary) {
+
+      previous_btn_disable = true;
+      next_btn_disable = true;
+    } else if(from_page === PAGE_ENUM.order_summary && to_page === PAGE_ENUM.recent_order_list) {
+
+      this.order_summary.$component.addClass("d-none");
+      this.recent_order_list.$component.removeClass("d-none");
+
+      previous_btn_disable = true;
+      next_btn_disable = true;
+    } else if(from_page === PAGE_ENUM.recent_order_list && to_page === PAGE_ENUM.order_summary) {
+
+      this.recent_order_list.$component.addClass("d-none");
+      this.order_summary.$component.removeClass("d-none");
+
+      previous_btn_disable = true;
+      next_btn_disable = true;
+    }
+
+    this.pagination_toolbar.update_pagination_status(previous_btn_disable, next_btn_disable);
+
+    this.from_page = from_page;
+    this.to_page = to_page;
+  }
+
+  init_pagination_toolbar() {
+		this.pagination_toolbar = new popsicle_sale.MobilePointOfSale.PaginationToolbar({
+			wrapper: this.$components_wrapper,
+			page: this.page,
+			events: {
+				on_next_page: () => this.go_to_next_page(),
+				on_prev_page: () => this.go_to_prev_page()
+			}
+		});
+	}
+
+	go_to_next_page() {
+
+    if(this.to_page === PAGE_ENUM.item_selector) {
+      // Update item selector's current page
+      this.update_pagination_status(PAGE_ENUM.item_selector, PAGE_ENUM.cart);
+    } else if(this.to_page === PAGE_ENUM.recent_order_list){
+      this.update_pagination_status(PAGE_ENUM.recent_order_list, PAGE_ENUM.order_summary);
+    } else {
+      this.update_pagination_status(this.to_page, this.from_page);
+    }
+	}
+
+	go_to_prev_page() {
+
+    if(this.from_page === PAGE_ENUM.item_details && this.to_page === PAGE_ENUM.cart) {
+      this.update_pagination_status(PAGE_ENUM.cart, PAGE_ENUM.item_selector);
+    } else if(this.to_page === PAGE_ENUM.recent_order_list && this.from_page !== PAGE_ENUM.order_summary) {
+      this.update_pagination_status(PAGE_ENUM.cart, PAGE_ENUM.item_selector);
+    } else {
+      this.update_pagination_status(this.to_page, this.from_page);
+    }
+  }
 };
