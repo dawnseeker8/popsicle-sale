@@ -1,4 +1,4 @@
-/* ../../../../../tmp/tmp-2164-6Cjd2hMH2ZEM/popsicle_sale/popsicle_sale/public/scss/mobile-point-of-sale.bundle.css */
+/* ../../../../../tmp/tmp-3845-IO2lwECgmjsY/popsicle_sale/popsicle_sale/public/scss/popsicle-sale.bundle.css */
 .point-of-sale-app.mobile-point-of-sale-app .pointer-no-select {
   cursor: pointer;
   -webkit-user-select: none;
@@ -57,4 +57,7 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
-/*# sourceMappingURL=mobile-point-of-sale.bundle.WVMIHJ2F.css.map */
+.navbar-home img.app-logo {
+  max-height: 50px;
+}
+/*# sourceMappingURL=popsicle-sale.bundle.ZJ7V22AC.css.map */
