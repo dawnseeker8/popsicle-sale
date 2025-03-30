@@ -114,7 +114,7 @@ popsicle_sale.MobilePointOfSale.PastOrderList = class {
 					<div class="invoice-date">${posting_datetime}</div>
 				</div>
 			</div>
-			<div class="seperator"></div>`;
+			<div class="separator"></div>`;
 	}
 
 	toggle_component(show) {

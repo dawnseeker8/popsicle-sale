@@ -590,7 +590,7 @@ popsicle_sale.MobilePointOfSale.ItemCart = class {
 		if (!$item_to_update.length) {
 			this.$cart_items_wrapper.append(
 				`<div class="cart-item-wrapper" data-row-name="${escape(item_data.name)}"></div>
-				<div class="seperator"></div>`
+				<div class="separator"></div>`
 			);
 			$item_to_update = this.get_cart_item(item_data);
 		}
@@ -1015,7 +1015,7 @@ popsicle_sale.MobilePointOfSale.ItemCart = class {
 							</div>
 						</div>
 					</div>
-					<div class="seperator"></div>`
+					<div class="separator"></div>`
 					);
 				});
 			});

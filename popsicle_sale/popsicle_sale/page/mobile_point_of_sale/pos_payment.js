@@ -613,12 +613,12 @@ popsicle_sale.MobilePointOfSale.Payment = class {
 				<div class="total-label">${__("Grand Total")}</div>
 				<div class="value">${format_currency(grand_total, currency)}</div>
 			</div>
-			<div class="seperator-y"></div>
+			<div class="separator-y"></div>
 			<div class="col">
 				<div class="total-label">${__("Paid Amount")}</div>
 				<div class="value">${format_currency(paid_amount, currency)}</div>
 			</div>
-			<div class="seperator-y"></div>
+			<div class="separator-y"></div>
 			<div class="col">
 				<div class="total-label">${label}</div>
 				<div class="value">${format_currency(change || remaining, currency)}</div>

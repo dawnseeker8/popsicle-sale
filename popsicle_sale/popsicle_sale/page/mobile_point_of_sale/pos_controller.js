@@ -455,7 +455,7 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 						this.order_summary.load_summary_of(this.frm.doc, true);
 						frappe.show_alert({
 							indicator: "green",
-							message: __("POS invoice {0} created succesfully", [r.doc.name]),
+							message: __("POS invoice {0} created successfully", [r.doc.name]),
 						});
             this.update_pagination_status(PAGE_ENUM.payment, PAGE_ENUM.order_summary);
 					});
@@ -567,6 +567,51 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 			}
 		});
 	}
+
+  // Get employee data from cashier
+ setup_sales_team() {
+    console.warn('Setting up sales team', this.frm);
+
+    return new Promise((resolve) => {
+      if (!this.frm.doc.sales_team || !this.frm.doc.sales_team.length) {
+        const cashier_id = frappe.session.user;
+
+        // Get employee based on user_id
+        frappe.db.get_value('Employee', { user_id: cashier_id }, ['name'])
+          .then(employee_data => {
+            console.warn('Employee data found ', employee_data);
+            if (employee_data && employee_data.message && employee_data.message.name) {
+              const employee_id = employee_data.message.name;
+
+              // Get Sales Person based on employee_id
+              return frappe.db.get_value('Sales Person', { employee: employee_id }, ['name', 'sales_person_name']);
+            }
+            return null;
+          })
+          .then(sales_person_data => {
+            console.warn('Sales Person data found ', sales_person_data);
+            if (sales_person_data && sales_person_data.message && sales_person_data.message.name) {
+              // Create sales team entry
+              this.frm.doc.sales_team = this.frm.doc.sales_team || [];
+              this.frm.doc.sales_team.push({
+                sales_person: sales_person_data.message.name,
+                allocated_percentage: 100,
+                allocated_amount: 0,
+                commission_rate: 0
+              });
+
+              if (this.frm.doc.docstatus === 0) {
+                this.frm.refresh_field('sales_team');
+              }
+            }
+            resolve();
+          })
+          .catch(err => {
+            console.error("Error setting up sales team:", err);
+          });
+      };
+    });
+  }
 
 	get_new_frm(_frm) {
 		const doctype = "POS Invoice";
@@ -878,7 +923,6 @@ popsicle_sale.MobilePointOfSale.Controller = class {
 	}
 
   update_pagination_status(from_page, to_page) {
-    console.warn(`update_pagination_status: ${from_page} to ${to_page}`);
 
     if(!this.is_mobile()) {
       return;
